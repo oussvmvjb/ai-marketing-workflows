@@ -1,0 +1,362 @@
+{
+  "name": "Instagram + Facebook Auto Post",
+  "nodes": [
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "captionText",
+              "value": "Hello from n8n 🚀 Auto post on Instagram & Facebook Postimages"
+            },
+            {
+              "name": "igId",
+              "value": "17841480689862810"
+            },
+            {
+              "name": "pageId",
+              "value": "937690489434300"
+            },
+            {
+              "name": "imageUrl",
+              "value": "={{ $json.data.response.resultUrls[0] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set Data1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "047bd43a-6674-4b6b-b257-f3c716732186"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $('Set Data1').item.json.pageId }}",
+        "edge": "videos",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "file_url",
+                "value": "={{ $('Set Data1').item.json.imageUrl }}"
+              },
+              {
+                "name": "caption",
+                "value": "={{ $('Set Data1').item.json.captionText }}"
+              },
+              {
+                "name": "title",
+                "value": "vedio"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Post to Facebook Page",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        192
+      ],
+      "id": "b1c4f03d-e625-40af-8e5c-cf55688d2c25",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "vKdUahdJ8y2ff0PI",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/veo/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 1d30347805fde6e9dbecdce93fba4a84"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.output }}\",\n \"model\": \"veo3_fast\",\n  \"aspect_ratio\": \"16:9\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        560,
+        0
+      ],
+      "id": "7c49480a-d765-4561-ae85-3ec66b9c99e6",
+      "name": "HTTP Request",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/veo/record-info",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "=f23658bfd1d3a9165a6306a817c2bf52"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 1d30347805fde6e9dbecdce93fba4a84"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        800,
+        0
+      ],
+      "id": "004fbd72-1c59-4ae6-8db5-bc6ff9d51cc1",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $json.igId }}",
+        "edge": "media",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "caption",
+                "value": "={{ $json.captionText }}"
+              },
+              {
+                "name": "media_type",
+                "value": "REELS"
+              },
+              {
+                "name": "video_url",
+                "value": "={{ $json.data.response.resultUrls[0] }}"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Create IG Media1",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        0
+      ],
+      "id": "6a6bda76-726d-4711-b177-9f9e3f33da5e",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "vKdUahdJ8y2ff0PI",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v23.0",
+        "node": "={{ $('Set Data1').item.json.igId }}",
+        "edge": "media_publish",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "creation_id",
+                "value": "={{ $json.id }}"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Publish Instagram",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        0
+      ],
+      "id": "e189c84c-1c96-4560-bc30-679dae50b16a",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "vKdUahdJ8y2ff0PI",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a creative video prompt generator for Google Veo AI video generation. Your task is to generate ONE detailed, cinematic video prompt based on the topic provided by the user.\n\nFollow this EXACT structure for every response:\n\n1. Start with the topic name as a brief header\n2. Write a single, detailed prompt (40-80 words) that includes:\n   - Main subject/action\n   - Environment/setting\n   - Lighting/mood\n   - Camera movement/style\n   - Visual details (colors, textures, atmosphere)\n   - Aspect ratio: 16:9\n\nSTRICT RULES:\n- NEVER add explanations, notes, or additional text - ONLY the prompt itself\n- NEVER use markdown formatting, bullet points, or numbering\n- NEVER include phrases like \"Here's your prompt:\" or \"Prompt:\"\n- ALWAYS write in descriptive, cinematic language\n- ALWAYS optimize for Veo3_fast model\n- ALWAYS in one line the rusltat\n\nNow generate a prompt for this topic: [{{ $json.chatInput }}] ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5990f2a9-d973-4dd9-bae3-029a665d8e8e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        208,
+        208
+      ],
+      "id": "aeb4dde4-b6f3-40a1-b645-12583e0e36ab",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "juUCP4ki2QyG0Q7Q",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5d2fc729-e9c7-4f4a-bef8-bab97d16ea07",
+      "name": "When chat message received",
+      "webhookId": "1c6c652f-02fa-4259-9a46-28fc6b29aff5",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Data1": {
+      "main": [
+        [
+          {
+            "node": "Post to Facebook Page",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create IG Media1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to Facebook Page": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Set Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create IG Media1": {
+      "main": [
+        [
+          {
+            "node": "Publish Instagram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "704cb7ef-64ad-46d1-b332-440d64c37d59",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b01aeae4dadea36e9276dbf995ab6a2fedbfa2d84939aaa8bf8294943d4b5aee"
+  },
+  "id": "pUUGREp-jy9UgpcrpQkmD",
+  "tags": []
+}
